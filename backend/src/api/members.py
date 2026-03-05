@@ -58,22 +58,24 @@ class PasswordChangeRequest(BaseModel):
 router = APIRouter(prefix="/members", tags=["Members Directory"])
 
 
+from sqlalchemy.exc import IntegrityError
+
 @router.post("/invite", dependencies=[require_admin])
 async def invite_member(
     username: str,
     email: str,
+    name: str,
+    vocation: str,
     role: str = "Member",
     db: AsyncSession = Depends(get_db)
 ):
-    """
-    FR-3: Only Admins can hit this route to add new members to the system.
-    """
-
     temp_password = "password"
     hashed_pwd = get_password_hash(temp_password)
 
     new_user = User(
         username=username,
+        name=name,
+        vocation=vocation,
         email=email,
         role=role,
         hash=hashed_pwd,
@@ -84,20 +86,24 @@ async def invite_member(
         db.add(new_user)
         await db.commit()
         await db.refresh(new_user)
-
-    except Exception as e:
+    except IntegrityError:
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User with that email or username might already exist."
+            detail="User with that email or username already exists."
+        )
+    except Exception as e:
+        await db.rollback()
+        print(f"Unexpected error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An internal server error occurred."
         )
 
     return {
         "message": f"Successfully invited {username}.",
-        "temporary_password": temp_password,
-        "instructions": "Please provide this temporary password to the user."
+        "temporary_password": temp_password
     }
-
 
 @router.put("/change-password")
 async def change_password(
@@ -178,11 +184,6 @@ async def update_own_profile(
     await db.commit()
     await db.refresh(user)
     return user
-
-# --- ADMINISTRATOR ROUTES (FR-25) ---
-
-# Note: You already built POST /members/invite in an earlier step! 
-# That satisfies the "add invited members" part of FR-25.
 
 @router.put("/{user_id}", response_model=MemberFullResponse, dependencies=[require_admin])
 async def update_member_record(
