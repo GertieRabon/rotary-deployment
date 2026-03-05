@@ -106,13 +106,13 @@ body {
 .hero__content {
   position: relative;
   z-index: 1;
-  max-width: 560px;
+  max-width: 650px;
   margin: 0 auto;
 }
 
 .hero__title {
   font-family: 'EB Garamond', Georgia, serif;
-  font-size: clamp(2.8rem, 6vw, 4.5rem);
+  font-size: clamp(3rem, 7vw, 5rem);
   font-weight: 500;
   letter-spacing: 0.04em;
   text-transform: uppercase;
