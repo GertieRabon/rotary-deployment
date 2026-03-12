@@ -141,6 +141,11 @@ export function ProfileTab() {
   if (loadError) return <p className="dash-panel__empty" style={{ color: '#b91c1c' }}>{loadError}</p>;
   if (!user) return <div className="dash-loading">Loading…</div>;
 
+  const displayName =
+    name && name.trim().length > 0
+      ? name.trim()
+      : (user.name && user.name.trim().length > 0 ? user.name.trim() : user.username);
+
   return (
     <div className="profile-layout">
 
@@ -148,11 +153,10 @@ export function ProfileTab() {
       <Section title="Account Info" subtitle="These details are managed by your administrator.">
         <div className="profile-identity">
           <div className="profile-identity__avatar">
-            {(user.name ?? user.username).charAt(0).toUpperCase()}
+            {(displayName || user.username).charAt(0).toUpperCase()}
           </div>
           <div className="profile-identity__details">
-            <span className="profile-identity__name">{user.name || user.username}</span>
-            <span className="profile-identity__meta">@{user.username}</span>
+            <span className="profile-identity__name">@{user.username}</span>
             <div className="profile-identity__badges">
               <span className={`dash-badge ${user.role === 'Admin' ? 'dash-badge--admin' : 'dash-badge--member'}`}>
                 {user.role}
