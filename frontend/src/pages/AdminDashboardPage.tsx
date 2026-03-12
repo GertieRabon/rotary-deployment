@@ -118,6 +118,8 @@ function MembersTab() {
   // Invite form state
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [vocation, setVocation] = useState('');
   const [role, setRole] = useState('Member');
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
@@ -146,14 +148,20 @@ function MembersTab() {
     setInviteError(null);
     setInviteSuccess(null);
 
-    if (!username.trim() || !email.trim()) {
-      setInviteError('Username and email are required.');
+    if (!username.trim() || !email.trim() || !name.trim() || !vocation.trim()) {
+      setInviteError('Username, email, full name, and vocation are required.');
       return;
     }
 
     setInviteLoading(true);
     try {
-      const query = new URLSearchParams({ username: username.trim(), email: email.trim(), role });
+      const query = new URLSearchParams({
+        username: username.trim(),
+        email: email.trim(),
+        name: name.trim(),
+        vocation: vocation.trim(),
+        role,
+      });
       const res = await fetch(`${API_BASE}/members/invite?${query}`, {
         method: 'POST',
         headers: authHeaders(),
@@ -170,6 +178,8 @@ function MembersTab() {
       );
       setUsername('');
       setEmail('');
+      setName('');
+      setVocation('');
       setRole('Member');
       loadMembers(); // refresh the list
     } catch (err) {
@@ -272,6 +282,26 @@ function MembersTab() {
                 placeholder="member@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div className="dash-invite-form__field">
+              <label className="dash-invite-form__label">Full Name</label>
+              <input
+                className="dash-invite-form__input"
+                type="text"
+                placeholder="e.g. Juan dela Cruz"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+            <div className="dash-invite-form__field">
+              <label className="dash-invite-form__label">Vocation</label>
+              <input
+                className="dash-invite-form__input"
+                type="text"
+                placeholder="e.g. Engineer, Teacher"
+                value={vocation}
+                onChange={(e) => setVocation(e.target.value)}
               />
             </div>
             <div className="dash-invite-form__field dash-invite-form__field--sm">
